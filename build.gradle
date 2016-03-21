@@ -1,0 +1,64 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'eclipse'
+
+version = "2.0.10"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+  testCompile group: 'junit', name: 'junit', version: '3.8'
+}
+
+test {
+  scanForTestClasses = false
+  include "**/JSONTests.class"
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': "Stringtree JSON reader, writer and validator", 'Implementation-Version': version
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'org.stringtree'
+            artifactId 'stringtree-json'
+            version version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username mavenUser
+                password mavenPassword
+            }
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+        }
+    }
+}
