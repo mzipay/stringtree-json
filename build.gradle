@@ -1,8 +1,9 @@
 apply plugin: 'java'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'signing'
 apply plugin: 'eclipse'
 
-version = "2.0.10"
+version = "2.0.9"
 
 repositories {
     mavenCentral()
@@ -31,34 +32,55 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId 'org.stringtree'
-            artifactId 'stringtree-json'
-            version version
-
-            from components.java
-
-            artifact sourceJar {
-                classifier "sources"
-            }
-
-            artifact javadocJar {
-                classifier "javadoc"
-            }
-        }
-    }
+artifacts {
+    archives javadocJar, sourceJar
 }
 
-publishing {
-    repositories {
-        maven {
-            credentials {
-                username mavenUser
-                password mavenPassword
-            }
-            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'Stringtree JSON'
+        packaging 'jar'
+        // optionally artifactId can be defined here 
+        description 'A lightwight, standards-compliant JSON reader, writer and validator'
+        url 'http://stringtree.org/stringtree-json.html'
+
+        scm {
+          connection 'scm:git:https://github.com/efficacy/stringtree-json.git'
+          developerConnection 'scm:git:git@github.com:efficacy/stringtree-json.git'
+          url 'https://github.com/efficacy/stringtree-json'
         }
+
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id 'efficacy'
+            name 'Frank Carver'
+            email 'frank@efsol.com'
+          }
+        }
+      }
     }
+  }
 }
