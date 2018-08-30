@@ -14,6 +14,7 @@ public class JSONValidatorTests extends TestCase {
         suite.addTestSuite(JSONValidatorInvalidStringTest.class);
         suite.addTestSuite(JSONValidatorInvalidArrayTest.class);
         suite.addTestSuite(JSONValidatorInvalidObjectTest.class);
+        suite.addTestSuite(ExceptionErrorListenerTest.class);
 
         return suite;
     }
